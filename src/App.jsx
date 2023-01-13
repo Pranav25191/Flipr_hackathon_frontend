@@ -1,15 +1,12 @@
 import { useState } from 'react'
-import reactLogo from './assets/react.svg'
 import './App.css'
+import CompanyDetails from './components/CompanyDetails'
+import NiftyBSE from './components/NiftyBSE.jsx'
 
 function App() {
-  const [count, setCount] = useState(0)
-
   return (
-    <div className="App">
-      <h1 className="text-3xl font-bold ">
-        Hello world!
-      </h1>
+    <div className="w-full h-fit flex flex-col items-center justify-center mb-20 gap-20">
+      <NiftyBSE/>
     </div>
   )
 }
