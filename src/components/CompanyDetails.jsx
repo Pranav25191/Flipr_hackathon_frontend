@@ -4,13 +4,22 @@ import { IgrFinancialChartModule } from 'igniteui-react-charts';
 // import  {stockIndexData} from './stockIndexData';
 import Loader from './Loader';
 import axios from "axios";
+import {link} from "./serverlink.js"
 function CompanyDetails(props) {
     // console.log(stockIndexData);
     const [isLoading,setIsLoading]=React.useState(true);
     const [stockIndexData,setStockIndexData]=React.useState([]);
     IgrFinancialChartModule.register();
     useEffect(()=>{
-        axios.get(`http://10.196.15.138:4444/historicaldata/${props.company}`).then((response)=>{
+        axios.get(`${link}/historicaldata/${props.company}`,{
+            withCredentials: false,
+            headers: {
+              Accept: "application/json",
+              "Content-Type": "application/json",
+              "Access-Control-Allow-Credentials": true,
+              "Authorization":`Bearer ${localStorage.getItem("token")}`,
+            },
+          }).then((response)=>{
             setStockIndexData(response.data.result);
             setIsLoading(false);
         }).catch((err)=>{
@@ -44,19 +53,3 @@ function CompanyDetails(props) {
 }
 
 export default CompanyDetails;
-// <Box sx={{ width: "90%" }}>
-// <FormControl fullWidth>
-//     <InputLabel id="demo-simple-select-label">Company</InputLabel>
-//     <Select
-//         labelId="demo-simple-select-label"
-//         id="demo-simple-select"
-//         value={company}
-//         label="Company"
-//         onChange={handleChange}
-//     >
-//         <MenuItem value={10}>Ten</MenuItem>
-//         <MenuItem value={20}>Twenty</MenuItem>
-//         <MenuItem value={30}>Thirty</MenuItem>
-//     </Select>
-// </FormControl>
-// </Box>

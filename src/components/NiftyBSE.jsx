@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import ChangeHistoryIcon from '@mui/icons-material/ChangeHistory';
+
 import Box from '@mui/material/Box';
 import Slider from '@mui/material/Slider';
 import Overview from './Overview';
@@ -11,6 +11,8 @@ import Select from '@mui/material/Select';
 import {link} from "./serverlink.js";
 import axios from "axios"
 import CompanyDetails from './CompanyDetails';
+import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
+import { ArrowDownward } from '@mui/icons-material';
 function NiftyBSE(props) {
 
     function valuetext(value) {
@@ -19,12 +21,21 @@ function NiftyBSE(props) {
     const [company, setCompany] = React.useState('NSE');
     const [companyData, setCompanyData] = React.useState('');
     const [isLoading,setIsLoading]=React.useState(true);
+    const [selectedIndex,setSelectedIndex]=React.useState(0);
     useEffect(()=>{
-        axios.get(`http://10.196.15.138:4444/metadata/NSE`).then((response)=>{
+        axios.get(`${link}/metadata/NSE`,{
+            withCredentials: false,
+            headers: {
+              Accept: "application/json",
+              "Content-Type": "application/json",
+              "Access-Control-Allow-Credentials": true,
+              "Authorization":`Bearer ${localStorage.getItem("token")}`,
+            },
+          }).then((response)=>{
             setCompanyData(response.data.result);
             setIsLoading(false);
         }).catch((err)=>{
-            console.log(err);
+            alert(err);
             setIsLoading(false);
 
         });
@@ -33,7 +44,15 @@ function NiftyBSE(props) {
       setCompany(event.target.value);
       setIsLoading(true);
       try {
-        let response=await axios.get(`http://10.196.15.138:4444/metadata/${event.target.value}`);
+        let response=await axios.get(`${link}/metadata/${event.target.value}`,{
+            withCredentials: false,
+            headers: {
+              Accept: "application/json",
+              "Content-Type": "application/json",
+              "Access-Control-Allow-Credentials": true,
+              "Authorization":`Bearer ${localStorage.getItem("token")}`,
+            },
+          });
         console.log(response.data.result);
         setCompanyData(response.data.result);
         setIsLoading(false);
@@ -90,19 +109,19 @@ function NiftyBSE(props) {
                                 <div className='w-fit flex flex-col gap-2 '>
                                     <p className='w-fit flex text-4xl font-extrabold'>{companyData.currClose}</p>
                                     {(companyData.currClose-companyData.prevClose)>=0 && <div className='w-fit flex text-xl  text-green-300 items-center justify-end'>
-                                        <ChangeHistoryIcon color='green' fontSize='medium'/>
+                                        <ArrowUpwardIcon color='green' fontSize='medium'/>
                                         <p className='w-fit flex text-2xl font-extrabold text-green-300'>
                                         {(companyData.currClose-companyData.prevClose).toFixed(2)}({((companyData.currClose-companyData.prevClose)/companyData.prevClose).toFixed(2)*100}%)
                                         </p>
                                     </div>}
                                     {(companyData.currClose-companyData.prevClose)<0 && <div className='w-fit flex text-xl  text-red-300 items-center justify-end'>
-                                        <ChangeHistoryIcon color='green' fontSize='medium'/>
+                                        <ArrowDownward color='green' fontSize='medium' style={{ transform: "rotateY(180deg)"}}/>
                                          <p className='w-fit flex text-2xl font-extrabold'>
                                         {(companyData.currClose-companyData.prevClose).toFixed(2)}({((companyData.currClose-companyData.prevClose)/companyData.prevClose).toFixed(2)*100}%)
                                         </p>
 
                                     </div>}
-                                    <p className='w-fit flex text-md font-light text-gray-300'>As on Jan 13 2023</p>
+                                    <p className='w-fit flex text-lg font-light text-zinc-500'>As on Jan 12 2023</p>
                                 </div>
                             </div>
                             <div className='w-[60%] flex flex-col pt-10 items-start h-[300px] '>
@@ -141,17 +160,22 @@ function NiftyBSE(props) {
                     </div>
                 </div>
                 <div className='w-[90%] 2xl:w-[90%] flex border-4 h-fit justify-start items-center gap-10 divide-x p-2 box-border m-auto 2xl:p-2 border-l-0 border-r-0 overflow-x-auto'>
-                    {navOptions.map((option)=>{
+                    {navOptions.map((option,index)=>{
                         return(
-                            <div className='w-32 h-10  border-gray-200 flex justify-center items-center text-md text-gray-400 box-border p-2'>
+                            <div className='w-32 h-10  border-gray-200 flex justify-center items-center text-md box-border p-2'
+                            style={{background:selectedIndex===index?"rgb(229 231 235)":"white"}}
+                            onClick={()=>setSelectedIndex(index)}>
                             {option}
                             </div>
                         )
                     })}    
                 </div>
-                <div className='w-[90%] 2xl:w-[90%]'>
+                <div className='w-[90%] 2xl:w-[90%] '>
                 {
-                    <Overview open={companyData.open} previousClose={companyData.prevClose} dayHigh={companyData.dayHigh} dayLow={companyData.dayLow} weekHigh={companyData['52WeekHigh']} weekLow={companyData['52WeekLow']} />
+                    selectedIndex===0 && <Overview open={companyData.open} previousClose={companyData.prevClose} dayHigh={companyData.dayHigh} dayLow={companyData.dayLow} weekHigh={companyData['52WeekHigh']} weekLow={companyData['52WeekLow']} />
+                }
+                {
+                    selectedIndex!==0 && <div className='w-full h-full flex items-center justify-center'>Coming Soon...</div>
                 }
                 </div>
                 
